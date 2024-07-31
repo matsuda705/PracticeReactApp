@@ -4,7 +4,7 @@ import { Book } from './books/entities/book.entity';
 
 export const AppDataSource = new DataSource({
   type: 'mysql',
-  host: 'localhost',
+  host: '172.21.0.3',
   port: 3306,
   username: 'develop',
   password: 'password',
