@@ -9,8 +9,9 @@
   - [参考](#参考)
   - [概要](#概要)
   - [手順](#手順)
-    - [mySQLのコンテナ起動](#mysqlのコンテナ起動)
+    - [mySQLのコンテナ起動とネットワークの共有](#mysqlのコンテナ起動とネットワークの共有)
     - [Nestjsのインストールとプロジェクトの作成](#nestjsのインストールとプロジェクトの作成)
+    - [マイグレーションの設定](#マイグレーションの設定)
 
 ## 参考
 
@@ -35,16 +36,142 @@
   - コード実装
   - SQLにCRUD操作ができていることの確認
 
-### mySQLのコンテナ起動
+### mySQLのコンテナ起動とネットワークの共有
 
 - Windows側からdocker/docker-compose.ymlを`docker-compose up`から実行し、mySQLのサーバーを起動しておく
+- TypeORMとMySQLを起動しているコンテナを同一ネットワークにして接続出来るようにする(下記コマンド)
+
+```bash
+# コンテナネットワークの作成
+$ docker network create my_network
+
+# 各コンテナをネットワークに入れる
+# "mysql_container_name"などは作成したコンテナの名前
+$ docker network connect my_network mysql_container_name
+$ docker network connect my_network typescript_dev_container_name  
+
+# ネットワークの確認
+$ docker network inspect my-network
+[
+    {
+        "Name": "my-network",
+        "Id": "xxxx",
+        "Created": "2024-07-31T01:25:05.595640912Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "172.21.0.0/16",
+                    "Gateway": "172.21.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "xxxx": {
+                "Name": "mysql_container_name",
+                "EndpointID": "xxxx",
+                "MacAddress": "02:42:ac:15:00:03",
+                "IPv4Address": "172.21.0.3/16",  # ★このアドレスに対して同一ネットワーク内のコンテナから接続が可能
+                "IPv6Address": ""
+            },
+            "xxxx": {
+                "Name": "typescript_dev_container_name",
+                "EndpointID": "xxxx",
+                "MacAddress": "02:42:ac:15:00:02",
+                "IPv4Address": "172.21.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+]
+```
 
 ### Nestjsのインストールとプロジェクトの作成
 
 ```bash
+# 必要なパッケージのインストール
 $ npm i -g @nestjs/cli
 $ nest new tutorial-app
 $ cd tutorial-app
 $ npm install --save @nestjs/typeorm typeorm mysql
+
+# プロジェクトの作成
+$ nest new type-orm_app
 ```
 
+### マイグレーションの設定
+
+- エンティティファイル(DB情報)を作成
+
+js/TypeORM/type-orm_app/src/books/entities/book.entity.ts
+
+```ts
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity('books')
+export class Book {
+  @PrimaryGeneratedColumn({
+    name: 'id',
+    unsigned: true,
+    type: 'smallint',
+    comment: 'ID',
+  })
+  readonly id: number;
+
+  @Column('varchar', { comment: '著者名' })
+  auther: string;
+
+  @Column('varchar', { comment: '備考' })
+  memo: string;
+}
+```
+
+エンティティファイルからマイグレーションファイルを作成
+
+```bash
+$ cd js/TypeORM/type-orm_app
+$ npx typeorm-ts-node-commonjs migration:generate src/migration/BookMigration -d src/books/entities/book.entity.ts
+```
+
+データベース接続設定の変更
+js/TypeORM/type-orm_app/src/data-source.ts
+
+```ts
+import 'reflect-metadata';
+import { DataSource } from 'typeorm';
+import { Book } from './books/entities/book.entity';
+
+export const AppDataSource = new DataSource({
+  type: 'mysql',
+  host: '172.21.0.3',  // dockerで設定したネットワーク内のmySQLコンテナのhost名
+  port: 3306,
+  username: 'develop',
+  password: 'password',
+  database: 'develop',
+  synchronize: true,
+  logging: false,
+  entities: [Book],
+  migrations: ['src/migration/*.ts'],
+});
+
+```
+
+
+マイグレーションの実行
+
+```bash
+$ npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
+```
