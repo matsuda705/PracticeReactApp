@@ -12,6 +12,8 @@
     - [mySQLのコンテナ起動とネットワークの共有](#mysqlのコンテナ起動とネットワークの共有)
     - [Nestjsのインストールとプロジェクトの作成](#nestjsのインストールとプロジェクトの作成)
     - [マイグレーションの設定](#マイグレーションの設定)
+    - [crud操作の実装](#crud操作の実装)
+      - [動作確認](#動作確認)
 
 ## 参考
 
@@ -175,4 +177,104 @@ export const AppDataSource = new DataSource({
 
 ```bash
 $ npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts
+```
+
+また、マイグレーションの設定を主導で行わなくてもdatabaseモジュールを記載した状態でnpm startすればマイグレーションは行われる
+
+js/TypeORM/type-orm_app/src/database.module.ts
+
+```ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Book } from './books/entities/book.entity';
+import { Cat } from './cats/entities/cat.entity';
+
+@Module({
+  imports: [
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: () => ({
+        // ★データベースとの接続設定を記載
+        type: 'mysql',
+        host: '172.21.0.3',
+        port: 3306,
+        username: 'develop',
+        password: 'password',
+        database: 'develop',
+        entities: [Book, Cat],
+        synchronize: true,
+      }),
+    }),
+  ],
+})
+export class DatabaseModule {}
+```
+
+app.module.tsで呼び出す
+
+js/TypeORM/type-orm_app/src/app.module.ts
+
+```ts
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { DatabaseModule } from './database.module';
+import { BooksModule } from './books/books.module';
+
+@Module({
+  imports: [BooksModule, DatabaseModule],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+
+```
+
+### crud操作の実装
+
+- Controller,Serviceを実装し、CRUD操作を出来るようにする
+- js/TypeORM/type-orm_app/src/books/books.controller.ts
+  - GETやPOST時に呼び出す動作を記載
+- js/TypeORM/type-orm_app/src/books/books.service.ts
+  - 上記Controllerから呼び出される実際のDB操作の内容を記載
+
+#### 動作確認
+
+登録
+
+```
+$ curl --location --request POST 'localhost:3000/cats' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{"name": "tama"}'
+```
+
+全件取得
+
+```bash
+curl --location --request GET 'localhost:3000/cats' \
+    --header 'Content-Type: application/json'
+```
+
+一件取得
+
+```bash
+curl --location --request GET 'localhost:3000/cats/1' \
+    --header 'Content-Type: application/json'
+```
+
+更新
+
+```bash
+curl --location --request PATCH 'localhost:3000/cats/1' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{"name": "pochi"}'
+```
+
+削除
+
+```bash
+curl --location --request DELETE 'localhost:3000/cats/1' \
+    --header 'Content-Type: application/json'
 ```
