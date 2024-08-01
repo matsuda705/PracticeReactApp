@@ -1,30 +1,53 @@
 # React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Viteで作成したアプリの学習内容を記載する
 
-Currently, two official plugins are available:
+## 目次
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [React + TypeScript + Vite](#react--typescript--vite)
+  - [目次](#目次)
+  - [参考](#参考)
+  - [viteの概要](#viteの概要)
+  - [インストール手順](#インストール手順)
 
-## Expanding the ESLint configuration
+## 参考
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- 公式ドキュメント: https://ja.vitejs.dev/guide/why.html
 
-- Configure the top-level `parserOptions` property like this:
+## viteの概要
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.app.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+- viteはJavaScriptにおいて開発環境を整えるために使用できるツール
+- 特徴
+  - テンプレートが用意されているため開発開始が容易
+  - 開発サーバー、ブラウザとの連携(コードを変更したときの更新)が高速
+  - 
+
+## インストール手順
+
+`vite_practice`という名前のviteプロジェクトの作成
+
+```bash
+$ npm create vite@latest
+> npx
+> create-vite
+
+✔ Project name: … vite_practice
+✔ Select a framework: › React
+✔ Select a variant: › TypeScript + SWC
+
+Scaffolding project in /workspaces/typescript-node/PracticeReactApp/js/vite_practice...
+
+Done. Now run:
+
+  cd vite_practice
+  npm install
+  npm run dev
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+インストールから立ち上げまで
+
+```bash
+$ cd vite_practice
+$ npm install
+$ npm run dev
+```
