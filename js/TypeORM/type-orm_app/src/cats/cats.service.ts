@@ -1,21 +1,21 @@
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
-import { CreateBookDto } from './dto/create-book.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
-import { Book } from './entities/book.entity';
+import { CreateCatDto } from './dto/create-cat.dto';
+import { UpdateCatDto } from './dto/update-cat.dto';
+import { Cat } from './entities/cat.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 @Injectable()
-export class BooksService {
-  constructor(@InjectRepository(Book) private bookRepository: Repository<Book>) { }
+export class CatsService {
+  constructor(@InjectRepository(Cat) private catRepository: Repository<Cat>) { }
 
   /**
    * @summary 登録機能
-   * @param createBookDto
+   * @param createCatDto
    */
-  async create(createBookDto: CreateBookDto): Promise<Book> {
-    return await this.bookRepository
-      .save({ id: createBookDto.id })
+  async create(createCatDto: CreateCatDto): Promise<Cat> {
+    return await this.catRepository
+      .save({ name: createCatDto.name })
       .catch((e) => {
         throw new InternalServerErrorException(e.message);
       });
@@ -24,8 +24,8 @@ export class BooksService {
   /**
    * @summary 全件取得
    */
-  async findAll(): Promise<Book[]> {
-    return await this.bookRepository.find().catch((e) => {
+  async findAll(): Promise<Cat[]> {
+    return await this.catRepository.find().catch((e) => {
       throw new InternalServerErrorException(e.message);
     });
   }
@@ -34,29 +34,29 @@ export class BooksService {
    * @summary 該当ID取得
    * @param id
    */
-  async findOne(id: number): Promise<Book> {
-    const book = await this.bookRepository.findOneBy({ id });
+  async findOne(id: number): Promise<Cat> {
+    const cat = await this.catRepository.findOneBy({ id });
 
-    if (!book) {
+    if (!cat) {
       throw new NotFoundException(
         `${id}に一致するデータが見つかりませんでした。`,
       );
     }
-    return book;
+    return cat;
   }
 
   /**
    * @summary 該当ID更新
    * @param id
    */
-  async update(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
+  async update(id: number, updateCatDto: UpdateCatDto): Promise<Cat> {
     {
-      await this.bookRepository
-        .update(id, { id: updateBookDto.id })
+      await this.catRepository
+        .update(id, { name: updateCatDto.name })
         .catch((e) => {
           throw new InternalServerErrorException(e.message);
         });
-      const updatedPost = await this.bookRepository.findOneBy({ id });
+      const updatedPost = await this.catRepository.findOneBy({ id });
       if (updatedPost) {
         return updatedPost
       }
@@ -69,7 +69,7 @@ export class BooksService {
    * @param id
    */
   async remove(id: number): Promise<DeleteResult> {
-    const response = await this.bookRepository.delete(id).catch((e) => {
+    const response = await this.catRepository.delete(id).catch((e) => {
       throw new InternalServerErrorException(e.message);
     });
     if (!response.affected) {
