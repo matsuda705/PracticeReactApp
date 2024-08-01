@@ -1,6 +1,6 @@
 # React + TypeScript + Vite
 
-React + TypeScript + Viteで作成したアプリの学習内容を記載する
+React+TypeScript+Viteで作成したアプリの学習内容を記載する
 
 ## 目次
 
