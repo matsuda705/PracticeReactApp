@@ -15,15 +15,16 @@
 
 ## 参考
 
-- SQLServerの立ち上げ: https://qiita.com/jpnm0415shkm/items/5cc26c6add41b41bd25e
-- CLIからGETとPOSTをする: https://qiita.com/takuyanin/items/949201e3eb100d4384e1
 - TypeScriptの公式docs: https://www.npmjs.com/package/typeorm/v/0.3.20
+- mySQLのサーバーの立ち上げ: https://qiita.com/jpnm0415shkm/items/5cc26c6add41b41bd25e
+- CLIからGETとPOSTをする: https://qiita.com/takuyanin/items/949201e3eb100d4384e1
 - TypeORM version0.3のCRUDアプリ作成の説明サイト: https://zenn.dev/hasegawasatoshi/articles/8110ce79119dd0
 - マイグレーション: https://qiita.com/Aurum64/items/f5962bd2a643447dbef9
 
 ## 概要
 
 - Next.js+TypeORMでMySQLのDBに対してCRUD操作を行うアプリを作成する
+- curlコマンドなどからAPIにデータを送信して対応したCRUD操作を行う
 
 ## 手順
 
